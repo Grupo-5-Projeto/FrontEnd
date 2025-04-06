@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Bot UPA</title>
+    <link rel="stylesheet" href="chat.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+    <button id="mode-toggle" onclick="toggleMode()">
+        <span id="mode-icon">☀️</span>
+    </button>
+
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box"></div>
+        <div class="input-container" id="input-container">
+            <div id="options" style="display: none;"></div>
+            <div id="input-field" style="display: none;">
+                <input type="text" id="user-input" placeholder="Digite aqui...">
+                <button onclick="handleUserInput()" id="btn-send">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="chat.js"></script>
+</body>
+
+</html>
