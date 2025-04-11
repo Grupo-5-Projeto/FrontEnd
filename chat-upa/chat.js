@@ -112,7 +112,7 @@ function handleUserInput() {
             chatBox.appendChild(wrapper);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            enviarDadosParaApi(cepInformado, numeroResidencia, wrapper);
+            verificarEnderecoViaCEP(cepInformado, numeroResidencia, wrapper);
         }
     }, 1000);
 }
@@ -246,6 +246,82 @@ function enviarDadosParaApi(cep, numero, loadingElement) {
             addMessage("Desculpe, houve um erro ao buscar a UPA. Tente novamente mais tarde.", "bot");
             console.error("Erro na comunicação com a API:", error);
         });
+}
+
+function verificarEnderecoViaCEP(cep, numero, loadingElement) {
+    fetch(`https://viacep.com.br/ws/${cep.replace('-', '')}/json/`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.erro) {
+                chatBox.removeChild(loadingElement);
+                addMessage("Endereço não encontrado. Verifique o CEP e tente novamente.", "bot");
+
+                chatStep = 1; // Volta para o passo do CEP
+                inputField.style.display = "flex";
+                userInput.setAttribute("maxlength", "9");
+                userInput.setAttribute("placeholder", "Digite seu CEP (XXXXX-XXX)");
+                userInput.value = "";
+                userInput.addEventListener("input", formatarCEP);
+
+                return;
+            }
+
+            // Se válido, envia para a sua API Python
+            confirmarEndereco(data, cep, numero, loadingElement);
+
+        })
+        .catch(error => {
+            chatBox.removeChild(loadingElement);
+            addMessage("Erro ao verificar o endereço. Tente novamente mais tarde.", "bot");
+            optionsContainer.style.display = "flex";
+            optionsContainer.innerHTML = `<button class="restart-button" onclick="startChat()">Recomeçar</button>`;
+            console.error("Erro na verificação do CEP:", error);
+        });
+}
+
+function confirmarEndereco(dataViaCep, cep, numero, loadingElement) {
+    chatBox.removeChild(loadingElement);
+
+    const enderecoCompleto = `${dataViaCep.logradouro}, ${numero} - ${dataViaCep.bairro}, ${dataViaCep.localidade} - ${dataViaCep.uf}`;
+
+    addMessage(`Confirme seu endereço: ${enderecoCompleto}`, "bot");
+
+    optionsContainer.style.display = "flex";
+    optionsContainer.innerHTML = `
+        <button class="accept-button" onclick="confirmarEnvioEndereco('${cep}', '${numero}')">Sim</button>
+        <button class="restart-button" onclick="repetirEndereco()">Não</button>
+    `;
+
+    inputField.style.display = "none";
+}
+
+function confirmarEnvioEndereco(cep, numero) {
+    optionsContainer.style.display = "none";
+    const loader = document.createElement("div");
+    loader.className = "loading-spinner";
+    const wrapper = document.createElement("div");
+    wrapper.className = "message-wrapper bot";
+    const img = document.createElement("img");
+    img.src = "https://cdn-icons-png.flaticon.com/512/4712/4712109.png";
+    img.className = "avatar";
+    wrapper.appendChild(img);
+    wrapper.appendChild(loader);
+    chatBox.appendChild(wrapper);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    enviarDadosParaApi(cep, numero, wrapper);
+}
+
+
+function repetirEndereco() {
+    addMessage("Certo, vamos tentar novamente. Informe seu CEP (XXXXX-XXX).", "bot");
+    chatStep = 1;
+    inputField.style.display = "flex";
+    optionsContainer.style.display = "none";
+    userInput.value = "";
+    userInput.setAttribute("maxlength", "9");
+    userInput.setAttribute("placeholder", "Digite seu CEP (XXXXX-XXX)");
+    userInput.addEventListener("input", formatarCEP);
 }
 
 
