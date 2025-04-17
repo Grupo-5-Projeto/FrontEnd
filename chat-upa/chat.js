@@ -220,14 +220,22 @@ function enviarDadosParaApi(cep, numero, loadingElement) {
             chatBox.removeChild(loadingElement);
             addMessage("Aqui está a melhor UPA para você:", "bot");
 
+            const transportModes = {
+                driving: "Carro",
+                walking: "A pé",
+                transit: "Transporte público"
+            };
+
+            const meioTransporte = transportModes[data.upa_recomendada.rotas.modo] || "Desconhecido";
+
             const upaElement = document.createElement("div");
             upaElement.classList.add("message", "bot");
             upaElement.innerHTML = `
-            <strong>${data.nome}</strong>
-            <p>${data.endereco}</p>
-            <p>Distância: ${data.distancia}</p>
-            <p>Meio de transporte: ${data.transporte}</p>
-            <p>Tempo estimado: ${data.tempo}</p>
+            <strong>${data.upa_recomendada.nome}</strong>
+            <p>${data.upa_recomendada.endereco}</p>
+            <p>Distância: ${data.upa_recomendada.rotas.distância}</p>
+            <p>Meio de transporte: ${meioTransporte}</p>
+            <p>Tempo estimado: ${data.upa_recomendada.rotas.tempoEstimado}</p>
             <img src="${data.linkImagem}" alt="Link Maps" style="width:100%;cursor:pointer;" onclick="window.open('${data.linkMaps}', '_blank')">`;
             chatBox.appendChild(upaElement);
 
