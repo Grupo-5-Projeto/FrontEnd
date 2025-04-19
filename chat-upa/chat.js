@@ -232,7 +232,7 @@ function enviarDadosParaApi(cep, numero, loadingElement) {
             upaElement.classList.add("message", "bot");
             upaElement.innerHTML = `
             <strong>${data.upa_recomendada.nome}</strong>
-            <p>${data.upa_recomendada.endereco}</p>
+            <p>${data.destino}</p>
             <p>Distância: ${data.upa_recomendada.rotas.distância}</p>
             <p>Meio de transporte: ${meioTransporte}</p>
             <p>Tempo estimado: ${data.upa_recomendada.rotas.tempoEstimado}</p>
