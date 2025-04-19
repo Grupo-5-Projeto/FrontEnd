@@ -220,23 +220,35 @@ function enviarDadosParaApi(cep, numero, loadingElement) {
             chatBox.removeChild(loadingElement);
             addMessage("Aqui está a melhor UPA para você:", "bot");
 
-            const transportModes = {
-                driving: "Carro",
-                walking: "A pé",
-                transit: "Transporte público"
-            };
-
-            const meioTransporte = transportModes[data.upa_recomendada.rotas.modo] || "Desconhecido";
+            console.log("Dados recebidos:", data);
 
             const upaElement = document.createElement("div");
             upaElement.classList.add("message", "bot");
+            let emoji = "🚗";
+            switch (data.upa_recomendada.rotas.modo.toLowerCase()) {
+                case "moto":
+                    emoji = "🏍️";
+                    break;
+                case "transporte público":
+                    emoji = "🚌";
+                    break;
+                case "a pé":
+                    emoji = "🚶‍♂️";
+                    break;
+            }
+
             upaElement.innerHTML = `
-            <strong>${data.upa_recomendada.nome}</strong>
-            <p>${data.destino}</p>
-            <p>Distância: ${data.upa_recomendada.rotas.distância}</p>
-            <p>Meio de transporte: ${meioTransporte}</p>
-            <p>Tempo estimado: ${data.upa_recomendada.rotas.tempoEstimado}</p>
-            <img src="${data.linkImagem}" alt="Link Maps" style="width:100%;cursor:pointer;" onclick="window.open('${data.linkMaps}', '_blank')">`;
+                <div class="upa-card">
+                    <h3 class="upa-nome">${data.upa_recomendada.nome}</h3>
+                    <p class="upa-endereco">${data.destino}</p>
+                    <div class="upa-info">
+                        <p><strong>📍 Distância:</strong> ${data.distancia}</p>
+                        <p><strong>${emoji} Transporte:</strong> ${data.upa_recomendada.rotas.modo}</p>
+                        <p><strong>⏱️ Tempo estimado:</strong> ${formatarTempo(data.upa_recomendada.rotas.tempoEstimado)}</p>
+                    </div>
+                    <img class="upa-img" src="${data.linkImagem}" alt="Mapa da UPA" onclick="window.open('${data.linkMaps}', '_blank')">
+                </div>
+            `;
             chatBox.appendChild(upaElement);
 
             setTimeout(() => {
@@ -254,6 +266,16 @@ function enviarDadosParaApi(cep, numero, loadingElement) {
             addMessage("Desculpe, houve um erro ao buscar a UPA. Tente novamente mais tarde.", "bot");
             console.error("Erro na comunicação com a API:", error);
         });
+}
+
+function formatarTempo(tempoEmMinutos) {
+    const horas = Math.floor(tempoEmMinutos / 60);
+    const minutos = tempoEmMinutos % 60;
+
+    if (horas > 0) {
+        return `${horas} hora${horas > 1 ? 's' : ''} e ${minutos} minuto${minutos > 1 ? 's' : ''}`;
+    }
+    return `${minutos} minuto${minutos > 1 ? 's' : ''}`;
 }
 
 function verificarEnderecoViaCEP(cep, numero, loadingElement) {
